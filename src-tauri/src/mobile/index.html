@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PhoneCam Mobile</title>
+  <style>
+    :root {
+      --baltic-amber: #ffb581;
+      --pumpkin: #f77a1b;
+      --dark-orange: #c74e00;
+      --burnt-red: #981d00;
+      --burned: #5a0b00;
+      --bg-dark: #0d0604;
+      --card-dark: #180d09;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: #f7ede2;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+    header {
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(90, 11, 0, 0.4) 0%, rgba(13, 6, 4, 0.9) 100%);
+      border-bottom: 1px solid rgba(199, 78, 0, 0.3);
+      z-index: 10;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--pumpkin), var(--burnt-red));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(247, 122, 27, 0.4);
+    }
+    .brand-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke: white;
+    }
+    .brand-text {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--baltic-amber), var(--pumpkin));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .status-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background-color: rgba(90, 11, 0, 0.6);
+      color: var(--baltic-amber);
+      border: 1px solid rgba(199, 78, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--pumpkin);
+      box-shadow: 0 0 6px var(--pumpkin);
+    }
+    .status-dot.connected {
+      background-color: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: #000;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      text-align: center;
+      background-color: rgba(13, 6, 4, 0.85);
+      z-index: 5;
+    }
+    .overlay.hidden {
+      display: none;
+    }
+    .overlay-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--baltic-amber);
+      margin-bottom: 8px;
+    }
+    .overlay-desc {
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      max-width: 280px;
+      line-height: 1.4;
+      margin-bottom: 20px;
+    }
+    .btn-action {
+      background: linear-gradient(135deg, var(--pumpkin), var(--dark-orange));
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(247, 122, 27, 0.4);
+    }
+    .controls-container {
+      position: absolute;
+      bottom: 24px;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 8;
+      pointer-events: none;
+    }
+    .lens-group {
+      display: flex;
+      background-color: rgba(20, 10, 7, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(199, 78, 0, 0.5);
+      border-radius: 9999px;
+      padding: 4px;
+      gap: 4px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+      pointer-events: auto;
+    }
+    .lens-group.hidden {
+      display: none;
+    }
+    .lens-btn {
+      background: transparent;
+      border: none;
+      color: var(--baltic-amber);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lens-btn.active {
+      background: linear-gradient(135deg, var(--pumpkin), var(--dark-orange));
+      color: white;
+      box-shadow: 0 0 10px rgba(247, 122, 27, 0.4);
+    }
+    .actions-row {
+      display: flex;
+      gap: 14px;
+      pointer-events: auto;
+    }
+    .control-btn {
+      background-color: rgba(20, 10, 7, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(199, 78, 0, 0.5);
+      color: var(--baltic-amber);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    }
+    .control-btn:active {
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
+          <circle cx="12" cy="13" r="3"></circle>
+        </svg>
+      </div>
+      <span class="brand-text">PhoneCam</span>
+    </div>
+    <div class="status-badge">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Connecting...</span>
+    </div>
+  </header>
+
+  <main>
+    <video id="video-preview" autoplay playsinline muted></video>
+
+    <div class="overlay" id="permission-overlay">
+      <h2 class="overlay-title">Camera Permission Required</h2>
+      <p class="overlay-desc">Tap below to grant camera access and start transmitting your camera feed.</p>
+      <button class="btn-action" id="btn-request">Enable Camera</button>
+    </div>
+
+    <div class="controls-container">
+      <div class="lens-group" id="lens-group">
+        <button class="lens-btn" id="btn-lens-wide">0.5x</button>
+        <button class="lens-btn active" id="btn-lens-main">1x</button>
+      </div>
+
+      <div class="actions-row">
+        <button class="control-btn" id="btn-flip">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+            <path d="M16 21h5v-5"></path>
+          </svg>
+          <span id="flip-label">Front</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session") || "";
+
+    const videoEl = document.getElementById("video-preview");
+    const statusDot = document.getElementById("status-dot");
+    const statusText = document.getElementById("status-text");
+    const overlay = document.getElementById("permission-overlay");
+    const btnRequest = document.getElementById("btn-request");
+    const btnFlip = document.getElementById("btn-flip");
+    const flipLabel = document.getElementById("flip-label");
+    const lensGroup = document.getElementById("lens-group");
+    const btnLensWide = document.getElementById("btn-lens-wide");
+    const btnLensMain = document.getElementById("btn-lens-main");
+
+    let currentFacing = "environment";
+    let currentLensMode = "main";
+    let activeStream = null;
+    let ws = null;
+    let pc = null;
+    let availableVideoDevices = [];
+    let ultraWideDeviceId = null;
+    let mainDeviceId = null;
+    let supportsHardwareZoomWide = false;
+
+    function setStatus(text, isConnected) {
+      statusText.textContent = text;
+      if (isConnected) {
+        statusDot.classList.add("connected");
+      } else {
+        statusDot.classList.remove("connected");
+      }
+    }
+
+    function initPeerConnection() {
+      if (pc) {
+        pc.close();
+      }
+
+      pc = new RTCPeerConnection({
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+      });
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: "ice-candidate",
+            candidate: event.candidate
+          }));
+        }
+      };
+
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => {
+          pc.addTrack(track, activeStream);
+        });
+      }
+    }
+
+    async function sendOffer() {
+      if (!pc || !ws || ws.readyState !== WebSocket.OPEN) return;
+      try {
+        const offer = await pc.createOffer({
+          offerToReceiveVideo: false,
+          offerToReceiveAudio: false
+        });
+        await pc.setLocalDescription(offer);
+        ws.send(JSON.stringify({
+          type: "offer",
+          sdp: offer.sdp
+        }));
+      } catch (_) {}
+    }
+
+    async function enumerateCameraDevices() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        availableVideoDevices = devices.filter(d => d.kind === "videoinput");
+
+        ultraWideDeviceId = null;
+        mainDeviceId = null;
+
+        for (const dev of availableVideoDevices) {
+          const label = dev.label.toLowerCase();
+          if (label.includes("ultra") || label.includes("wide") && !label.includes("front") && (label.includes("0.5") || label.includes("ultra wide"))) {
+            ultraWideDeviceId = dev.deviceId;
+          } else if (label.includes("back") || label.includes("rear") || label.includes("0") || label.includes("main")) {
+            if (!mainDeviceId) {
+              mainDeviceId = dev.deviceId;
+            }
+          }
+        }
+
+        updateLensUIVisibility();
+      } catch (_) {}
+    }
+
+    function updateLensUIVisibility() {
+      if (currentFacing === "user") {
+        lensGroup.classList.add("hidden");
+        flipLabel.textContent = "Back";
+      } else {
+        flipLabel.textContent = "Front";
+        if (ultraWideDeviceId || supportsHardwareZoomWide) {
+          lensGroup.classList.remove("hidden");
+        } else {
+          lensGroup.classList.add("hidden");
+        }
+      }
+    }
+
+    async function startCameraStream() {
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
+      }
+
+      let constraints = { audio: false };
+
+      if (currentFacing === "user") {
+        constraints.video = {
+          facingMode: { ideal: "user" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30, max: 60 }
+        };
+      } else {
+        if (currentLensMode === "wide" && ultraWideDeviceId) {
+          constraints.video = {
+            deviceId: { exact: ultraWideDeviceId },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30, max: 60 }
+          };
+        } else if (mainDeviceId) {
+          constraints.video = {
+            deviceId: { exact: mainDeviceId },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30, max: 60 }
+          };
+        } else {
+          constraints.video = {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30, max: 60 }
+          };
+        }
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        activeStream = stream;
+        videoEl.srcObject = stream;
+        overlay.classList.add("hidden");
+
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack && typeof videoTrack.getCapabilities === "function") {
+          const capabilities = videoTrack.getCapabilities();
+          if (capabilities.zoom) {
+            if (capabilities.zoom.min < 1.0) {
+              supportsHardwareZoomWide = true;
+            }
+            if (currentLensMode === "wide" && capabilities.zoom.min < 1.0) {
+              try {
+                await videoTrack.applyConstraints({
+                  advanced: [{ zoom: capabilities.zoom.min }]
+                });
+              } catch (_) {}
+            }
+          }
+        }
+
+        updateLensUIVisibility();
+
+        if (pc) {
+          const senders = pc.getSenders();
+          const videoSender = senders.find(s => s.track && s.track.kind === "video");
+          if (videoSender && videoTrack) {
+            await videoSender.replaceTrack(videoTrack);
+          } else {
+            initPeerConnection();
+            await sendOffer();
+          }
+        } else {
+          initPeerConnection();
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            await sendOffer();
+          }
+        }
+
+        setStatus("Streaming Live", true);
+      } catch (err) {
+        overlay.classList.remove("hidden");
+        setStatus("Camera Blocked", false);
+      }
+    }
+
+    function initWebSocket() {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${protocol}//${window.location.host}/ws?session=${sessionId}`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = async () => {
+        if (activeStream) {
+          if (!pc) {
+            initPeerConnection();
+          }
+          await sendOffer();
+          setStatus("Transmitting to PC", true);
+        } else {
+          setStatus("Camera initializing...", false);
+        }
+      };
+
+      ws.onclose = () => {
+        setStatus("Disconnected", false);
+        setTimeout(initWebSocket, 2000);
+      };
+
+      ws.onerror = () => {
+        setStatus("Network Error", false);
+      };
+
+      ws.onmessage = async (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "ping") {
+            ws.send(JSON.stringify({ type: "pong" }));
+          } else if (msg.type === "answer" && pc) {
+            await pc.setRemoteDescription(new RTCSessionDescription(msg));
+            setStatus("Streaming Live", true);
+          } else if (msg.type === "ice-candidate" && pc && msg.candidate) {
+            await pc.addIceCandidate(new RTCIceCandidate(msg.candidate));
+          }
+        } catch (_) {}
+      };
+    }
+
+    btnRequest.addEventListener("click", async () => {
+      await startCameraStream();
+      await enumerateCameraDevices();
+    });
+
+    btnFlip.addEventListener("click", async () => {
+      currentFacing = currentFacing === "environment" ? "user" : "environment";
+      currentLensMode = "main";
+      btnLensMain.classList.add("active");
+      btnLensWide.classList.remove("active");
+      await startCameraStream();
+    });
+
+    btnLensWide.addEventListener("click", async () => {
+      if (currentLensMode === "wide") return;
+      currentLensMode = "wide";
+      btnLensWide.classList.add("active");
+      btnLensMain.classList.remove("active");
+      await startCameraStream();
+    });
+
+    btnLensMain.addEventListener("click", async () => {
+      if (currentLensMode === "main") return;
+      currentLensMode = "main";
+      btnLensMain.classList.add("active");
+      btnLensWide.classList.remove("active");
+      await startCameraStream();
+    });
+
+    (async () => {
+      await startCameraStream();
+      await enumerateCameraDevices();
+      initWebSocket();
+    })();
+  </script>
+</body>
+</html>

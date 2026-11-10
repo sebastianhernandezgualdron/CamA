@@ -1,16 +1,11 @@
 [package]
 name = "cama"
 version = "0.1.0"
-description = "A Tauri App"
+description = "PhoneCam - Local Smartphone Webcam"
 authors = ["you"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
-# The `_lib` suffix may seem redundant but it is necessary
-# to make the lib name unique and wouldn't conflict with the bin name.
-# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
 name = "cama_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
@@ -22,9 +17,22 @@ tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.8", features = ["ws"] }
+axum-server = { version = "0.7", features = ["tls-rustls"] }
+rcgen = "0.13"
+local-ip-address = "0.6"
+tower-http = { version = "0.6", features = ["cors"] }
+uuid = { version = "1", features = ["v4"] }
+futures-util = "0.3"
+virtualcam = "1.0.0"
 
+[profile.dev]
+opt-level = 2
 
-# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[profile.dev.package."*"]
+opt-level = 3
+
 [profile.release]
 codegen-units = 1
 lto = true

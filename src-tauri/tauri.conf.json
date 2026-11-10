@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "cama",
+  "productName": "PhoneCam",
   "version": "0.1.0",
-  "identifier": "com.shergul.cama",
+  "identifier": "com.shergul.phonecam",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,9 +12,10 @@
   "app": {
     "windows": [
       {
-        "title": "cama",
+        "title": "PhoneCam",
         "width": 800,
-        "height": 600
+        "height": 650,
+        "resizable": true
       }
     ],
     "security": {

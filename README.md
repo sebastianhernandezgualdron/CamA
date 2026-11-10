@@ -1,7 +1,3 @@
-# Tauri + React + Typescript
+# CamA
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
-
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+CamA is an open-source application that lets you use your smartphone as a webcam for your computer. It uses **Tauri + Rust** for the desktop application, **React + TypeScript** for the user interface, and **WebRTC** to stream the camera over the local network. The project is designed to be free, private, simple, and without ads, subscriptions, accounts, or cloud services.
